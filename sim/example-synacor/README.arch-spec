@@ -1,73 +1,116 @@
 == architecture ==
 - three storage regions
+  - 三个存储区域
   - memory with 15-bit address space storing 16-bit values
+    - 具有 15 位地址空间、存储 16 位值的内存
   - eight registers
+    - 八个寄存器
   - an unbounded stack which holds individual 16-bit values
+    - 一个可存放单个 16 位值的无界栈
 - all numbers are unsigned integers 0..32767 (15-bit)
+  - 所有数字均为无符号整数 0..32767（15 位）
 - all math is modulo 32768; 32758 + 15 => 5
+  - 所有算术运算均按模 32768 进行；32758 + 15 => 5
 
 == binary format ==
 - each number is stored as a 16-bit little-endian pair (low byte, high byte)
+  - 每个数字以 16 位小端序对存储（低字节、高字节）
 - numbers 0..32767 mean a literal value
+  - 数字 0..32767 表示字面量值
 - numbers 32768..32775 instead mean registers 0..7
+  - 数字 32768..32775 则表示寄存器 0..7
 - numbers 32776..65535 are invalid
+  - 数字 32776..65535 无效
 - programs are loaded into memory starting at address 0
+  - 程序从地址 0 开始加载到内存
 - address 0 is the first 16-bit value, address 1 is the second 16-bit value, etc
+  - 地址 0 是第一个 16 位值，地址 1 是第二个 16 位值，依此类推
 
 == execution ==
 - After an operation is executed, the next instruction to read is immediately after the last argument of the current operation.
   If a jump was performed, the next operation is instead the exact destination of the jump.
+  - 一条操作执行后，下一条待读指令紧跟当前操作的最后一个参数。
+    若发生跳转，下一条操作则位于跳转的精确目的地址。
 - Encountering a register as an operation argument should be taken as reading from the register or setting into the register as appropriate.
+  - 当寄存器编码出现在操作参数中时，应按上下文将其解释为读取该寄存器，或写入该寄存器。
 
 == hints ==
 - Start with operations 0, 19, and 21.
+  - 可以从操作 0、19 和 21 开始。
 - Here's a code for the challenge website: jTTockJlJiOC
+  - 挑战网站的代码：jTTockJlJiOC
 - The program "9,32768,32769,4,19,32768" occupies six memory addresses and should:
+  - 程序 "9,32768,32769,4,19,32768" 占用六个内存地址，其作用应为：
   - Store into register 0 the sum of 4 and the value contained in register 1.
+    - 将 4 与寄存器 1 当前值的和存入寄存器 0。
   - Output to the terminal the character with the ascii code contained in register 0.
+    - 向终端输出寄存器 0 中 ASCII 码对应的字符。
 
 == opcode listing ==
 halt: 0
   stop execution and terminate the program
+  停止执行并终止程序
 set: 1 a b
   set register <a> to the value of <b>
+  将寄存器 <a> 设为 <b> 的值
 push: 2 a
   push <a> onto the stack
+  将 <a> 压入栈
 pop: 3 a
   remove the top element from the stack and write it into <a>; empty stack = error
+  移除栈顶元素并写入 <a>；空栈 = 错误
 eq: 4 a b c
   set <a> to 1 if <b> is equal to <c>; set it to 0 otherwise
+  若 <b> 等于 <c>，将 <a> 设为 1；否则设为 0
 gt: 5 a b c
   set <a> to 1 if <b> is greater than <c>; set it to 0 otherwise
+  若 <b> 大于 <c>，将 <a> 设为 1；否则设为 0
 jmp: 6 a
   jump to <a>
+  跳转至 <a>
 jt: 7 a b
   if <a> is nonzero, jump to <b>
+  若 <a> 非零，跳转至 <b>
 jf: 8 a b
   if <a> is zero, jump to <b>
+  若 <a> 为零，跳转至 <b>
 add: 9 a b c
   assign into <a> the sum of <b> and <c> (modulo 32768)
+  将 <b> 与 <c> 的和（模 32768）写入 <a>
 mult: 10 a b c
   store into <a> the product of <b> and <c> (modulo 32768)
+  将 <b> 与 <c> 的乘积（模 32768）写入 <a>
 mod: 11 a b c
   store into <a> the remainder of <b> divided by <c>
+  将 <b> 除以 <c> 的余数写入 <a>
 and: 12 a b c
   stores into <a> the bitwise and of <b> and <c>
+  将 <b> 与 <c> 的按位与写入 <a>
 or: 13 a b c
   stores into <a> the bitwise or of <b> and <c>
+  将 <b> 与 <c> 的按位或写入 <a>
 not: 14 a b
   stores 15-bit bitwise inverse of <b> in <a>
+  将 <b> 的 15 位按位取反结果写入 <a>
 rmem: 15 a b
   read memory at address <b> and write it to <a>
+  读取地址 <b> 的内存，并将其写入 <a>
 wmem: 16 a b
   write the value from <b> into memory at address <a>
+  将 <b> 的值写入内存地址 <a>
 call: 17 a
   write the address of the next instruction to the stack and jump to <a>
+  将下一条指令的地址压入栈，然后跳转至 <a>
 ret: 18
   remove the top element from the stack and jump to it; empty stack = halt
+  弹出栈顶元素并跳转至该地址；空栈 = 停机
 out: 19 a
   write the character represented by ascii code <a> to the terminal
+  向终端写入 ASCII 码 <a> 所表示的字符
 in: 20 a
   read a character from the terminal and write its ascii code to <a>; it can be assumed that once input starts, it will continue until a newline is encountered; this means that you can safely read whole lines from the keyboard and trust that they will be fully read
+  从终端读取一个字符，并将其 ASCII 码写入 <a>；可假定输入一旦开始，会持续到换行；
+  因而可以安全地从键盘读取整行，并相信该行会完整到达
 noop: 21
   no operation
+  空操作
