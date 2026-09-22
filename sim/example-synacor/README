@@ -13,3 +13,16 @@ Implementing it here ends up being quite useful: it acts as a simple constrained
 "real world" example for people who want to implement a new simulator for their
 own architecture.  We demonstrate all the basic fundamentals (registers, memory,
 branches, and tracing) that all ports should have.
+
+Synacor 挑战是一个有趣的编程练习，其中内置了若干谜题。你可以在这里找到更多细节：
+https://challenge.synacor.com/
+
+第一个谜题是为他们自定义的 ISA 编写一个解释器。
+这是一个用于该自定义 CPU 的模拟器。这个 CPU 相当基础：它是 16 位的，
+只有 8 个寄存器和一组有限的指令。这意味着该移植版永远不会增加新功能。
+更多细节请参阅 README.arch-spec。
+
+在这里实现它最终非常有用：对于那些想为自己的架构实现新模拟器的人来说，
+它可以作为一个简单且受限的“真实世界”示例。
+我们演示了所有移植版都应具备的基本要素（寄存器、内存、分支和跟踪）。
+
